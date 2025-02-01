@@ -1,0 +1,10 @@
+#get a token off a machine using powershell
+
+$headers = @{"Metadata"="true"}
+$resource = "https://management.azure.com/"
+$apiVersion = "2021-02-01"
+$tokenUrl = "http://169.254.169.254/metadata/identity/oauth2/token?api-version=$apiVersion&resource=$resource"
+
+$response = Invoke-RestMethod -Uri $tokenUrl -Headers $headers -Method Get
+$accessToken = $response.access_token
+Write-Output "Bearer Token: $accessToken" 
