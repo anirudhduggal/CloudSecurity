@@ -1,10 +1,26 @@
-#get a token off a machine using powershell
-
-$headers = @{"Metadata"="true"}
+ $headers = @{"Metadata"="true"}
 $resource = "https://management.azure.com/"
 $apiVersion = "2021-02-01"
 $tokenUrl = "http://169.254.169.254/metadata/identity/oauth2/token?api-version=$apiVersion&resource=$resource"
 
 $response = Invoke-RestMethod -Uri $tokenUrl -Headers $headers -Method Get
 $accessToken = $response.access_token
-Write-Output "Bearer Token: $accessToken" 
+Write-Output "Bearer Token: $accessToken"
+
+#test to create a storage account
+
+$subscriptionId = "subId"
+$resourceGroup = "resourceGroup"
+$storageAccountName = "testanirudhstorage123"
+$location = "eastus"
+
+$uri = "https://management.azure.com/subscriptions/$subscriptionId/resourceGroups/$resourceGroup/providers/Microsoft.Storage/storageAccounts/$storageAccountName/?api-version=2021-09-01"
+
+$body = @{
+    location   = $location
+    sku        = @{ name = "Standard_LRS" }
+    kind       = "StorageV2"
+    properties = @{ supportsHttpsTrafficOnly = $true }
+} | ConvertTo-Json -Depth 10
+
+Invoke-RestMethod -Uri $uri -Method Put -Headers @{Authorization = "Bearer $accessToken"; "Content-Type" = "application/json"} -Body $body 
